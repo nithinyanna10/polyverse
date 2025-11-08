@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  kotlin_analytics:
+    build: ../kotlin_analytics
+    ports:
+      - "8083:8083"
+    networks:
+      - polyverse-network
+
+  php_api:
+    build: ../php_api
+    ports:
+      - "8080:80"
+    networks:
+      - polyverse-network
+
+  ruby_worker:
+    build: ../ruby_worker
+    ports:
+      - "8084:8084"
+    networks:
+      - polyverse-network
+
+  elixir_websocket:
+    build: ../elixir_websocket
+    ports:
+      - "8085:8085"
+    networks:
+      - polyverse-network
+
+  lua_scripting:
+    build: ../lua_scripting
+    ports:
+      - "8086:8086"
+    networks:
+      - polyverse-network
+
+networks:
+  polyverse-network:
+    driver: bridge
