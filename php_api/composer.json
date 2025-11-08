@@ -1,0 +1,14 @@
+{
+    "name": "polyverse/php-api",
+    "description": "🔌 PHP API Service for Polyverse",
+    "type": "project",
+    "require": {
+        "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Polyverse\\Api\\": "src/"
+        }
+    }
+}
+
