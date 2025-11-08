@@ -1,0 +1,13 @@
+graph TD
+    A[Client] -->|HTTP/WebSocket| B[Hub]
+    B -->|gRPC| C[Python Agent]
+    B -->|HTTP| D[Rust Signal]
+    B -->|HTTP| E[Go Orchestrator]
+    B -->|HTTP| F[Java Recommender]
+    C -->|Results| B
+    D -->|Events| B
+    E -->|Tasks| B
+    F -->|Recommendations| B
+    B -->|WebSocket| G[Observatory]
+    G -->|Visualization| H[Dashboard]
+

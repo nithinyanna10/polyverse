@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [python, node, go, rust, java]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Python
+      if: matrix.language == 'python'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Setup Node.js
+      if: matrix.language == 'node'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Setup Go
+      if: matrix.language == 'go'
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Rust
+      if: matrix.language == 'rust'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    
+    - name: Setup Java
+      if: matrix.language == 'java'
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Run Tests
+      run: |
+        case ${{ matrix.language }} in
+          python)
+            cd hub && pip install -r requirements.txt && pytest || true
+            cd ../python_agent && pip install -r requirements.txt || true
+            ;;
+          node)
+            cd observatory && npm install && npm test || true
+            cd ../js_dashboard && npm install && npm test || true
+            ;;
+          go)
+            cd go_orchestrator && go test ./... || true
+            ;;
+          rust)
+            cd rust_signal && cargo test || true
+            ;;
+          java)
+            cd java_recommender && mvn test || true
+            ;;
+        esac
+

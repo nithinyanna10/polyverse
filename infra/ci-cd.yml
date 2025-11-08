@@ -1,0 +1,103 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [python, node, go, rust, java]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Python
+      if: matrix.language == 'python'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Setup Node.js
+      if: matrix.language == 'node'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    - name: Setup Go
+      if: matrix.language == 'go'
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Setup Rust
+      if: matrix.language == 'rust'
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    
+    - name: Setup Java
+      if: matrix.language == 'java'
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Run Tests
+      run: |
+        case ${{ matrix.language }} in
+          python)
+            cd hub && pip install -r requirements.txt && pytest
+            cd ../python_agent && pip install -r requirements.txt
+            ;;
+          node)
+            cd observatory && npm install && npm test
+            cd ../js_dashboard && npm install && npm test
+            ;;
+          go)
+            cd go_orchestrator && go test ./...
+            ;;
+          rust)
+            cd rust_signal && cargo test
+            ;;
+          java)
+            cd java_recommender && mvn test
+            ;;
+        esac
+    
+    - name: Build Docker Images
+      run: |
+        case ${{ matrix.language }} in
+          python)
+            docker build -t polyverse/hub:latest ./hub
+            ;;
+          node)
+            docker build -t polyverse/observatory:latest ./observatory
+            ;;
+          go)
+            docker build -t polyverse/go-orchestrator:latest ./go_orchestrator
+            ;;
+          rust)
+            docker build -t polyverse/rust-signal:latest ./rust_signal
+            ;;
+          java)
+            docker build -t polyverse/java-recommender:latest ./java_recommender
+            ;;
+        esac
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production..."
+        # TODO: Add deployment steps
+
